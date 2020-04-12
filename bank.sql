@@ -1,59 +1,93 @@
-CREATE TABLE BRANCH(
-    BRANCH_NAME VARCHAR2(25),
-    BRANCHCITY VARCHAR2(25),
-    ASSETS REAL,
-    PRIMARY KEY(BRANCH_NAME)
-    );
+create table branch(
+branch_name varchar(20),
+branch_city varchar(20),
+assets int,
+primary key(branch_name)
+);
+create table accounts(
+account_no int,
+branch_name varchar(20),
+balance real,
+primary key(account_no),
+foreign key(branch_name) references branch(branch_name)
+);
 
-CREATE TABLE ACCOUNTS(
-    ACCNO INT,
-    BRANCH_NAME VARCHAR2(25),
-    BALANCE REAL,
-    PRIMARY KEY(ACCNO),
-    FOREIGN KEY(BRANCH_NAME) REFERENCES BRANCH(BRANCH_NAME) ON DELETE CASCADE
-    );
+create table depositor(
+customer_name varchar(20),
+customer_street varchar(20),
+customer_city varchar(20),
+primary key(customer_name)
+);
+create table Loan(
+loan_number int,
+branch_name varchar(20),
+amount real,
+primary key(loan_number),
+foreign key(branch_name) references branch(branch_name)
+);
 
-CREATE TABLE CUSTOMER(
-    CUSTOMER_NAME VARCHAR(25),
-    CUSTOMER_STREET VARCHAR2(25),
-    CUSTOMER_CITY VARCHAR2(25),
-    PRIMARY KEY(CUSTOMER_NAME)
-    );
-    
-CREATE TABLE DEPOSITOR(
-    CUSTOMER_NAME VARCHAR(25),
-    ACCNO INT,
-    PRIMARY KEY(CUSTOMER_NAME, ACCNO),
-    FOREIGN KEY(CUSTOMER_NAME) REFERENCES CUSTOMER(CUSTOMER_NAME) ON DELETE CASCADE,
-    FOREIGN KEY(ACCNO) REFERENCES ACCOUNTS(ACCNO) ON DELETE CASCADE
-    );
-
-CREATE TABLE LOAN(
-    LOAN_NUMBER INT,
-    BRANCH_NAME VARCHAR2(25),
-    AMOUNT REAL,
-    PRIMARY KEY(LOAN_NUMBER),
-    FOREIGN KEY(BRANCH_NAME) REFERENCES BRANCH(BRANCH_NAME) ON DELETE CASCADE
-    );
-    
-CREATE TABLE BORROWER(
-    CUSTOMER_NAME VARCHAR2(25),
-    LOAN_NUMBER INT,
-    PRIMARY KEY(CUSTOMER_NAME),
-    FOREIGN KEY(CUSTOMER_NAME) REFERENCES CUSTOMER(CUSTOMER_NAME) ON DELETE CASCADE,
-    FOREIGN KEY(LOAN_NUMBER) REFERENCES LOAN(LOAN_NUMBER) ON DELETE CASCADE
-    );
-
-INSERT INTO BRANCH VALUES('&BRANCH_NAME', '&BRANCHCITY', &ASSETS);
-INSERT INTO ACCOUNTS VALUES(&ACCNO, '&BRANCH_NAME', &BALANCE);
-INSERT INTO CUSTOMER VALUES('&CUSTOMER_NAME', '&CUSTOMER_STREET', '&CUSTOMER_CITY');
-INSERT INTO DEPOSITOR VALUES('&CUSTOMER_NAME', &ACCNO);
-INSERT INTO LOAN VALUES(&LOAN_NUMBER, '&BRANCH_NAME', &AMOUNT);
-INSERT INTO BORROWER VALUES('&CUSTOMER_NAME', &LOAN_NUMBER);
-
-SELECT * FROM BRANCH;
-SELECT * FROM ACCOUNTS;
-SELECT * FROM CUSTOMER;
-SELECT * FROM DEPOSITOR;
-SELECT * FROM LOAN;
-SELECT * FROM BORROWER;
+create table borrower(
+customer_name varchar(20),
+loan_number int,
+foreign key(customer_name) references depositor(customer_name),
+foreign key(loan_number) references Loan(loan_number)
+);
+create table customer(
+customer_name varchar(20),
+account_no int,
+foreign key(customer_name) references depositor(customer_name),
+foreign key(account_no) references accounts(account_no)
+);
+insert into branch values('branch_name12','branch_city1',100000),
+('branch_name22','branch_city2',200000),
+('branch_name32','branch_city3',300000);
+select * from branch;
+insert into accounts values
+(11111,'branch_name12',111),
+(22222,'branch_name12',222),
+(33333,'branch_name22',333),
+(44444,'branch_name22',444),
+(55555,'branch_name32',555),
+(66666,'branch_name32',666);
+insert into accounts values
+(11112,'branch_name12',111),
+(11113,'branch_name12',111)
+;
+select * from accounts;
+insert into depositor values
+('cust1','street1','city1'),
+('cust2','street2','city2'),
+('cust3','street3','city3'),
+('cust4','street4','city4'),
+('cust5','street5','city5');
+select * from depositor;
+insert into Loan values
+(11,'branch_name12',120000),
+(12,'branch_name12',120000),
+(21,'branch_name22',220000),
+(22,'branch_name22',220000),
+(31,'branch_name32',320000),
+(32,'branch_name32',320000);
+select * from loan;
+insert into borrower values
+('cust1',11),
+('cust2',12),
+('cust3',21),
+('cust4',22),
+('cust5',31);
+select * from borrower;
+select * from depositor ;
+insert into customer values
+('cust1',11111),
+('cust2',22222),
+('cust3',33333),
+('cust4',44444),
+('cust5',55555);
+insert into customer values
+('cust1',11112),
+('cust1',11113);
+select * from customer;
+select (c.customer_name) from customer c,Accounts a
+where a.account_no=c.account_no and a.branch_name= 'branch_name12' group by c.customer_name having count(*)>=2;
+select (c.customer_name) from customer c,Accounts a,branch b
+where a.account_no=c.account_no and a.branch_city= 'branch_city1' 
