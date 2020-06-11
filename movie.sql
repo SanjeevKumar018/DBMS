@@ -1,63 +1,105 @@
-create table actor(
-    act_id int(20),
-    act_name varchar(20),
-    act_gender varchar(30),
-    primary key(act_id)
-    );
-create table DIRECTOR (
-    dir_id int(30),
-    dir_name varchar(30),
-    dir_phone int(30),
-    primary key(dir_id)
-    );
-create table movies ( 
-              mov_id int(30), 
-               mov_title varchar(30), 
-               mov_year int(30), 
-              mov_lang varchar(30), 
-            dir_id int(30),
-           primary key(mov_id), 
-         FOREIGN key(dir_id) REFERENCES director(dir_id) 
-         );
-create table movie_cast ( 
-              act_id int(30), 
-             mov_id int(30), 
-             role varchar(30),
-           FOREIGN KEY(act_id) REFERENCES actor
-          FOREIGN key(mov_id) REFERENCES movies(mov_id) 
-        );
-  create table rating ( 
-        mov_id int(30), 
-       rev_stars int(30),
-        foriegn key(mov_id) references movies(mov_id)               
- );
-INSERT INTO actor VALUES ('101', 'sowmya', 'f');
-INSERT INTO actor VALUES ('102', 'radha', 'f');
-INSERT INTO actor VALUES ('103', 'raghav', 'm');
-INSERT INTO actor VALUES ('104', 'sanjith', 'm');
-INSERT INTO movie_cast VALUES ('101', '1001', 'heroine');
-INSERT INTO movie_cast VALUES ('101', '1002', 'heroine');
-INSERT INTO movie_cast VALUES ('103', '1003', 'hero');
-INSERT INTO movie_cast VALUES ('103', '1002', 'guest');
-INSERT INTO  movie_cast VALUES ('104', '1004', 'hero');
-INSERT INTO director  VALUES ('50', 'rajmouli', '8861621844');
-INSERT INTO director VALUES ('51', 'steven spielberg', '7760521044');
-INSERT INTO director VALUES ('52', 'hitchcock', '9964786122');
-INSERT INTO director VALUES ('53', 'karan', '8766488994');
-INSERT INTO movies VALUES ('1001', 'kgf1', '2018', 'kannada', '51');
-INSERT INTO movies VALUES ('1002', 'bulbul', '2016', 'kannada', '51');
-INSERT INTO movies VALUES ('1003', 'bigil', '2019', 'tamil', '52');
-INSERT INTO movies VALUES ('1004', 'immaiku', '2018', 'telagu', '52');
-INSERT INTO rating VALUES ('1001', '4');
-INSERT INTO rating VALUES ('1002', '2');
-INSERT INTO rating VALUES ('1003', '5');
-INSERT INTO rating VALUES ('1004', '4');
-sql queries
-1.select mov_title from movies where dir_id in (select dir_id from director where dir_name='Hitchcock');
-2.select mov_title from movies m, movie_cast mv where m.mov_id=mv.mov_id and act_id in( select act_id from movie_cast group by act_id having count( act_id)>1) group by mov_title having count(*)>1;
-3.select act_name from actor a join movie_cast c on a.act_id=c.act_id join movies m on c.mov_id=m.mov_id where m.mov_year not between 2000 and 2015;
-4.select mov_title ,max(rev_stars) from movies inner join rating using(mov_id) group by mov_title having max(rev_stars)>0 order by mov_title;
-5.update rating
-set rev_stars=5 where mov_id
-in(select mov_id from movies where dir_id
-in(select dir_id from director where dir_name='Steven Spielberg'));
+CREATE TABLE ACTOR ( 
+ACT_ID INT, 
+ACT_NAME VARCHAR (20), 
+ACT_GENDER CHAR (1), 
+PRIMARY KEY (ACT_ID)); 
+
+CREATE TABLE DIRECTOR ( 
+DIR_ID INT, 
+DIR_NAME VARCHAR (20), 
+DIR_PHONE LONG, 
+PRIMARY KEY (DIR_ID)); 
+
+CREATE TABLE MOVIES ( 
+MOV_ID INT, 
+MOV_TITLE VARCHAR (25), 
+MOV_YEAR INT, 
+MOV_LANG VARCHAR (12), 
+DIR_ID INT, 
+PRIMARY KEY (MOV_ID), 
+FOREIGN KEY (DIR_ID) REFERENCES DIRECTOR (DIR_ID));
+
+CREATE TABLE MOVIE_CAST ( 
+ACT_ID INT, 
+MOV_ID INT, 
+AROLE VARCHAR(10), 
+PRIMARY KEY (ACT_ID, MOV_ID), 
+FOREIGN KEY(ACT_ID) REFERENCES ACTOR(ACT_ID) ON DELETE CASCADE, 
+FOREIGN KEY(MOV_ID) REFERENCES MOVIES(MOV_ID) ON DELETE CASCADE); 
+
+CREATE TABLE RATING ( 
+MOV_ID INT, 
+REV_STARS VARCHAR (25), 
+PRIMARY KEY (MOV_ID), 
+FOREIGN KEY (MOV_ID) REFERENCES MOVIES (MOV_ID));
+
+INSERT INTO ACTOR VALUES (301,'ANUSHKA','F'); 
+INSERT INTO ACTOR VALUES (302,'PRABHAS','M'); 
+INSERT INTO ACTOR VALUES (303,'PUNITH','M'); 
+INSERT INTO ACTOR VALUES (304,'JERMY','M'); 
+
+INSERT INTO DIRECTOR VALUES (60,'RAJAMOULI', 8751611001); 
+INSERT INTO DIRECTOR VALUES (61,'HITCHCOCK', 7766138911); 
+INSERT INTO DIRECTOR VALUES (62,'FARAN', 9986776531); 
+INSERT INTO DIRECTOR VALUES (63,'STEVEN SPIELBERG', 8989776530); 
+
+INSERT INTO MOVIES VALUES (1001,'BAHUBALI-2', 2017,'TELAGU', 60); 
+INSERT INTO MOVIES VALUES (1002,'BAHUBALI-1', 2015, 'TELAGU', 60); 
+INSERT INTO MOVIES VALUES (1003,'AKASH', 2008, 'KANNADA', 61); 
+INSERT INTO MOVIES VALUES (1004,'WAR HORSE', 2011, 'ENGLISH', 63); 
+
+INSERT INTO MOVIE_CAST VALUES (301, 1002, 'HEROINE'); 
+INSERT INTO MOVIE_CAST VALUES (301, 1001, 'HEROINE'); 
+INSERT INTO MOVIE_CAST VALUES (303, 1003, 'HERO'); 
+INSERT INTO MOVIE_CAST VALUES (303, 1002, 'GUEST'); 
+INSERT INTO MOVIE_CAST VALUES (304, 1004, 'HERO'); 
+
+INSERT INTO RATING VALUES (1001, 4); 
+INSERT INTO RATING VALUES (1002, 2);
+
+INSERT INTO RATING VALUES (1003, 5); 
+INSERT INTO RATING VALUES (1004, 4);
+
+/*1. List the titles of all movies directed by ‘Hitchcock’. */
+
+SELECT MOV_TITLE 
+FROM MOVIES 
+WHERE DIR_ID IN (SELECT DIR_ID 
+FROM DIRECTOR 
+WHERE DIR_NAME = 'HITCHCOCK');
+
+/*2. Find the movie names where one or more actors acted in two or more movies. */
+SELECT MOV_TITLE 
+FROM MOVIES M, MOVIE_CAST MV 
+WHERE M.MOV_ID=MV.MOV_ID AND ACT_ID IN (SELECT ACT_ID 
+FROM MOVIE_CAST GROUP BY ACT_ID 
+HAVING COUNT(ACT_ID)>1) 
+GROUP BY MOV_TITLE 
+HAVING COUNT(*)>1;
+
+
+/*3. List all actors who acted in a movie before 2000 and also in a movie after 2015 (use JOIN operation).*/ 
+SELECT ACT_NAME, MOV_TITLE, MOV_YEAR
+FROM ACTOR A 
+JOIN MOVIE_CAST C 
+ON A.ACT_ID=C.ACT_ID 
+JOIN MOVIES M 
+ON C.MOV_ID=M.MOV_ID 
+WHERE M.MOV_YEAR NOT BETWEEN 2000 AND 2015;
+
+/*4. Find the title of movies and number of stars for each movie that has at least one rating and find the highest number of stars that movie received. Sort the result by movie title. */
+SELECT MOV_TITLE, MAX(REV_STARS) 
+FROM MOVIES 
+INNER JOIN RATING USING (MOV_ID) 
+GROUP BY MOV_TITLE 
+HAVING MAX(REV_STARS)>0 
+ORDER BY MOV_TITLE;
+
+/*5. Update rating of all movies directed by ‘Steven Spielberg’ to 5 KL */
+
+UPDATE RATING 
+SET REV_STARS=5 
+WHERE MOV_ID IN(SELECT MOV_ID FROM MOVIES 
+WHERE DIR_ID IN(SELECT DIR_ID 
+FROM DIRECTOR 
+WHERE DIR_NAME = 'STEVEN SPIELBERG'));
